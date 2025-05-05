@@ -1,9 +1,7 @@
 import 'package:flutter/material.dart';
-import 'package:senior_project/service_model.dart';
 import 'package:easy_localization/easy_localization.dart';
-import '_CompanyBookingPage.dart';
-import '_OrderData.dart';
-
+import 'package:senior_project/service_model.dart';
+import 'ProviderServicesPage.dart'; // Make sure this is the correct path
 
 class ServiceProvidersPage extends StatelessWidget {
   final Service service;
@@ -12,7 +10,6 @@ class ServiceProvidersPage extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final _ = context.locale;
     final Map<String, List<String>> providerMap = {
       "Cleaning": ["SparkleClean", "Maid in Minutes", "ShinySpaces"],
       "Handyman": ["FixIt All", "HandyPro Services", "DIY Dude"],
@@ -38,55 +35,19 @@ class ServiceProvidersPage extends StatelessWidget {
         itemCount: providers.length,
         itemBuilder: (context, index) {
           final provider = providers[index];
+          final providerId = provider.toLowerCase().replaceAll(' ', '_');
 
           return GestureDetector(
-            onTap: () async {
-              final booking = await Navigator.of(context).push(
-                PageRouteBuilder(
-                  pageBuilder: (_, __, ___) => CompanyBookingPage(
-                    companyName: provider,
-                    serviceName: service.nameKey.tr(),
+            onTap: () {
+              Navigator.push(
+                context,
+                MaterialPageRoute(
+                  builder: (_) => ProviderServicesPage(
+                    providerId: providerId,
+                    providerName: provider,
                   ),
-                  transitionsBuilder: (_, animation, __, child) {
-                    return FadeTransition(opacity: animation, child: child);
-                  },
-                  transitionDuration: const Duration(milliseconds: 400),
                 ),
               );
-
-              if (booking != null && context.mounted) {
-                try {
-                  pendingOrders.add(Order(
-                    company: booking['company'],
-                    service: booking['service'],
-                    date: booking['date'],
-                    time: booking['time'],
-                    address: booking['address'],
-                  ));
-
-                  Navigator.of(context).pop();
-
-                  ScaffoldMessenger.of(context).showSnackBar(
-                    const SnackBar(
-                      content: Text(
-                        'Booking successful!',
-                        style: TextStyle(color: Colors.white),
-                      ),
-                      backgroundColor: Colors.green,
-                    ),
-                  );
-                } catch (e) {
-                  ScaffoldMessenger.of(context).showSnackBar(
-                    const SnackBar(
-                      content: Text(
-                        'Booking failed. Please try again.',
-                        style: TextStyle(color: Colors.white),
-                      ),
-                      backgroundColor: Colors.red,
-                    ),
-                  );
-                }
-              }
             },
             child: Card(
               margin: const EdgeInsets.only(bottom: 16),
@@ -101,14 +62,13 @@ class ServiceProvidersPage extends StatelessWidget {
                     borderRadius: const BorderRadius.vertical(
                       top: Radius.circular(16),
                     ),
-            child: Image.asset(
-              'assets/images/Screenshot_2025-03-24_213038-removebg-preview.png',
+                    child: Image.asset(
+                      'assets/images/Screenshot_2025-03-24_213038-removebg-preview.png',
                       height: 160,
                       width: double.infinity,
                       fit: BoxFit.cover,
                     ),
                   ),
-
                   Padding(
                     padding: const EdgeInsets.all(12),
                     child: Row(

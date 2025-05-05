@@ -3,7 +3,11 @@ import 'package:flutter/material.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:senior_project/service_model.dart';
 import 'package:senior_project/service_providers_page.dart';
+import 'package:latlong2/latlong.dart';
+
 import '_Chatbot.dart';
+import 'LocationPickerScreen.dart';
+import 'ProviderAdminTestPage.dart';
 
 class HomeScreen extends StatefulWidget {
   const HomeScreen({super.key});
@@ -17,6 +21,10 @@ class _HomeScreenState extends State<HomeScreen>
   late AnimationController _controller;
   late Animation<double> _fadeIn;
   String? _userName;
+
+  // ✅ Location-related state
+  LatLng? _selectedLocation;
+  String _locationText = "Select your location";
 
   @override
   void initState() {
@@ -47,6 +55,7 @@ class _HomeScreenState extends State<HomeScreen>
   @override
   Widget build(BuildContext context) {
     final _ = context.locale;
+
     return Scaffold(
       backgroundColor: Colors.grey[100],
       body: FadeTransition(
@@ -57,7 +66,6 @@ class _HomeScreenState extends State<HomeScreen>
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               const SizedBox(height: 10),
-
               if (_userName != null && _userName!.isNotEmpty)
                 Text(
                   "${"hello".tr()}, $_userName 👋",
@@ -68,7 +76,54 @@ class _HomeScreenState extends State<HomeScreen>
                   ),
                 ),
 
-              const SizedBox(height: 16),
+              // ✅ Location Selector
+              GestureDetector(
+                onTap: () async {
+                  final result = await Navigator.push(
+                    context,
+                    MaterialPageRoute(builder: (_) => const LocationPickerScreen()),
+                  );
+                  if (result != null && result is LatLng) {
+                    setState(() {
+                      _selectedLocation = result;
+                      _locationText =
+                      "Lat: ${result.latitude.toStringAsFixed(4)}, Lng: ${result.longitude.toStringAsFixed(4)}";
+                    });
+                  }
+                },
+                child: Container(
+                  padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+                  margin: const EdgeInsets.only(top: 12, bottom: 16),
+                  decoration: BoxDecoration(
+                    color: Colors.white,
+                    borderRadius: BorderRadius.circular(12),
+                    boxShadow: [
+                      BoxShadow(
+                        color: Colors.black12,
+                        blurRadius: 4,
+                        offset: Offset(0, 2),
+                      ),
+                    ],
+                  ),
+                  child: Row(
+                    children: [
+                      const Icon(Icons.location_on, color: Color(0xFF007EA7)),
+                      const SizedBox(width: 8),
+                      Expanded(
+                        child: Text(
+                          _locationText,
+                          style: const TextStyle(
+                            fontSize: 16,
+                            color: Colors.black87,
+                            fontWeight: FontWeight.w500,
+                          ),
+                          overflow: TextOverflow.ellipsis,
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+              ),
 
               TextField(
                 decoration: InputDecoration(
@@ -85,7 +140,6 @@ class _HomeScreenState extends State<HomeScreen>
                   ),
                 ),
               ),
-
               const SizedBox(height: 20),
               Text(
                 "home.available_services".tr(),
@@ -95,6 +149,30 @@ class _HomeScreenState extends State<HomeScreen>
                   color: Colors.black87,
                 ),
               ),
+              const SizedBox(height: 10),
+
+              ElevatedButton(
+                onPressed: () {
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                      builder: (_) => const ProviderAdminTestPage(),
+                    ),
+                  );
+                },
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: Colors.redAccent,
+                  padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(8),
+                  ),
+                ),
+                child: const Text(
+                  "Go to Admin Test Page",
+                  style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold),
+                ),
+              ),
+
               const SizedBox(height: 10),
               Expanded(
                 child: GridView.builder(
@@ -136,7 +214,6 @@ class _HomeScreenState extends State<HomeScreen>
   }
 }
 
-
 // --------------------- SERVICE TILE ---------------------
 class ServiceTile extends StatelessWidget {
   final Service service;
@@ -152,7 +229,8 @@ class ServiceTile extends StatelessWidget {
         onTap: () {
           Navigator.of(context).push(
             PageRouteBuilder(
-              pageBuilder: (_, __, ___) => ServiceProvidersPage(service: service),
+              pageBuilder: (_, __, ___) =>
+                  ServiceProvidersPage(service: service),
               transitionsBuilder: (_, animation, __, child) {
                 return FadeTransition(
                   opacity: animation,
@@ -176,8 +254,8 @@ class ServiceTile extends StatelessWidget {
               const SizedBox(height: 8),
               Text(
                 service.nameKey.tr(),
-                style:
-                    const TextStyle(fontWeight: FontWeight.w600, fontSize: 14),
+                style: const TextStyle(
+                    fontWeight: FontWeight.w600, fontSize: 14),
                 textAlign: TextAlign.center,
               ),
             ],
@@ -189,7 +267,6 @@ class ServiceTile extends StatelessWidget {
 }
 
 // --------------------- SERVICE MODEL ---------------------
-
 final List<Service> serviceList = [
   Service(nameKey: "service.cleaning", icon: Icons.cleaning_services),
   Service(nameKey: "service.handyman", icon: Icons.handyman),
@@ -199,3 +276,4 @@ final List<Service> serviceList = [
   Service(nameKey: "service.moving", icon: Icons.move_to_inbox),
   Service(nameKey: "service.more", icon: Icons.more_horiz),
 ];
+

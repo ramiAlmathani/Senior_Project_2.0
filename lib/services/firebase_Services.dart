@@ -57,4 +57,42 @@ class FirebaseService {
   Future<void> signOut() async {
     await _auth.signOut();
   }
+  Future<void> addProvider() async {
+    await FirebaseFirestore.instance.collection('providers').doc('sparkle_clean').set({
+      'name': 'SparkleClean',
+      'category': 'cleaning',
+      'rating': 4.5,
+      'location': 'Riyadh',
+      'image': 'https://link-to-image.com/image.jpg',
+      'services': [
+        {'name': 'Deep Cleaning', 'price': 100},
+        {'name': 'Regular Cleaning', 'price': 70},
+      ],
+    });
+  }
+
+
+}
+
+class FirebaseAdminService {
+  final FirebaseFirestore _firestore = FirebaseFirestore.instance;
+
+  Future<void> addProvider({
+    required String id, // unique ID for document
+    required String name,
+    required String category,
+    required String imageUrl,
+    required List<Map<String, dynamic>> services,
+    double rating = 4.5,
+    String location = "Unknown",
+  }) async {
+    await _firestore.collection('providers').doc(id).set({
+      'name': name,
+      'category': category,
+      'rating': rating,
+      'location': location,
+      'image': imageUrl,
+      'services': services,
+    });
+  }
 }

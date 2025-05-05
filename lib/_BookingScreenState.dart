@@ -2,15 +2,15 @@ import 'package:flutter/material.dart';
 import 'package:senior_project/services/firebase_Services.dart';
 
 class BookingScreen extends StatefulWidget {
-  final String? service;
-  final String? date;
-  final String? time;
+  final List<Map<String, dynamic>> services;
+  final String providerName;
+  final double totalCost;
 
   const BookingScreen({
     super.key,
-    this.service,
-    this.date,
-    this.time,
+    required this.services,
+    required this.providerName,
+    required this.totalCost,
   });
 
   @override
@@ -18,7 +18,6 @@ class BookingScreen extends StatefulWidget {
 }
 
 class _BookingScreenState extends State<BookingScreen> {
-  late TextEditingController _serviceController;
   late TextEditingController _dateController;
   late TextEditingController _timeController;
   final TextEditingController _addressController = TextEditingController();
@@ -28,14 +27,12 @@ class _BookingScreenState extends State<BookingScreen> {
   @override
   void initState() {
     super.initState();
-    _serviceController = TextEditingController(text: widget.service ?? '');
-    _dateController = TextEditingController(text: widget.date ?? '');
-    _timeController = TextEditingController(text: widget.time ?? '');
+    _dateController = TextEditingController();
+    _timeController = TextEditingController();
   }
 
   @override
   void dispose() {
-    _serviceController.dispose();
     _dateController.dispose();
     _timeController.dispose();
     _addressController.dispose();
@@ -43,12 +40,11 @@ class _BookingScreenState extends State<BookingScreen> {
   }
 
   Future<void> _submitBooking() async {
-    final service = _serviceController.text.trim();
     final date = _dateController.text.trim();
     final time = _timeController.text.trim();
     final address = _addressController.text.trim();
 
-    if (service.isEmpty || date.isEmpty || time.isEmpty || address.isEmpty) {
+    if (date.isEmpty || time.isEmpty || address.isEmpty) {
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(content: Text('Please fill all fields.')),
       );
@@ -57,14 +53,16 @@ class _BookingScreenState extends State<BookingScreen> {
 
     try {
       await firebaseService.createBookingRequest(
-        service: service,
+        service: widget.services.map((e) => e['name']).join(', '),
         date: date,
         time: time,
         address: address,
       );
 
       final confirmationMessage =
-          "✅ Your booking for $service on $date at $time has been confirmed.";
+          "✅ Booking for ${widget.providerName} confirmed!\n"
+          "Services: ${widget.services.map((e) => e['name']).join(', ')}\n"
+          "Date: $date\nTime: $time";
 
       if (context.mounted) {
         Navigator.pop(context, confirmationMessage);
@@ -91,8 +89,33 @@ class _BookingScreenState extends State<BookingScreen> {
           borderSide: BorderSide.none,
         ),
         contentPadding:
-            const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
+        const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
       ),
+    );
+  }
+
+  Widget _buildServiceSummary() {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        const Text("Selected Services", style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold)),
+        const SizedBox(height: 8),
+        ...widget.services.map((s) => Row(
+          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+          children: [
+            Text(s['name']),
+            Text("${s['price']} SAR"),
+          ],
+        )),
+        const Divider(),
+        Row(
+          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+          children: [
+            const Text("Total", style: TextStyle(fontWeight: FontWeight.bold)),
+            Text("${widget.totalCost.toStringAsFixed(2)} SAR", style: const TextStyle(fontWeight: FontWeight.bold)),
+          ],
+        ),
+      ],
     );
   }
 
@@ -110,8 +133,8 @@ class _BookingScreenState extends State<BookingScreen> {
         child: SingleChildScrollView(
           child: Column(
             children: [
-              _buildTextField("Service", _serviceController),
-              const SizedBox(height: 18),
+              _buildServiceSummary(),
+              const SizedBox(height: 24),
               _buildTextField("Date", _dateController),
               const SizedBox(height: 18),
               _buildTextField("Time", _timeController),
@@ -148,3 +171,4 @@ class _BookingScreenState extends State<BookingScreen> {
     );
   }
 }
+

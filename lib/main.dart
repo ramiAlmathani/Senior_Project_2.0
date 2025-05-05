@@ -7,7 +7,7 @@ import '_LandingPage.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import '_SplashPage.dart';
 import '_Chatbot.dart';
-import '_BookingScreenState.dart';
+import '_BookingScreenState.dart'; // Updated BookingScreen
 import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:easy_localization/easy_localization.dart';
 
@@ -18,6 +18,7 @@ void main() async {
   await dotenv.load(fileName: "K.env");
   final prefs = await SharedPreferences.getInstance();
   final hasSeenLanding = prefs.getBool('seenLandingPage') ?? false;
+
   runApp(
     EasyLocalization(
       supportedLocales: const [Locale('en'), Locale('ar')],
@@ -35,26 +36,30 @@ class MyApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
-        debugShowCheckedModeBanner: false,
-        title: 'Handz',
-        locale: context.locale,
-        supportedLocales: context.supportedLocales,
-        localizationsDelegates: context.localizationDelegates,
-        home: const SplashScreen(),
-        routes: {
-          '/landing': (context) => const LandingPage(),
-          '/phoneVerification': (context) => const PhoneVerificationPage(),
-          '/chatbot': (context) => const ChatbotPage(),
-          '/profile': (context) => const MyProfilePage(),
-          '/booking': (context) {
-            final args = ModalRoute.of(context)!.settings.arguments
-                as Map<String, dynamic>?;
-            return BookingScreen(
-              service: args?['service'],
-              date: args?['date'],
-              time: args?['time'],
-            );
-          },
-        });
+      debugShowCheckedModeBanner: false,
+      title: 'Handz',
+      locale: context.locale,
+      supportedLocales: context.supportedLocales,
+      localizationsDelegates: context.localizationDelegates,
+      home: const SplashScreen(),
+      routes: {
+        '/landing': (context) => const LandingPage(),
+        '/phoneVerification': (context) => const PhoneVerificationPage(),
+        '/chatbot': (context) => const ChatbotPage(),
+        '/profile': (context) => const MyProfilePage(),
+
+        // 🛠️ Updated Booking Route with new BookingScreen params
+        '/booking': (context) {
+          final args = ModalRoute.of(context)!.settings.arguments
+          as Map<String, dynamic>?;
+
+          return BookingScreen(
+            services: args?['services'] ?? [],
+            providerName: args?['providerName'] ?? 'Unknown Provider',
+            totalCost: args?['totalCost'] ?? 0.0,
+          );
+        },
+      },
+    );
   }
 }
