@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'main_page.dart';
 import 'package:intl/intl.dart';
 import 'package:latlong2/latlong.dart';
 import 'package:senior_project/services/firebase_Services.dart';
@@ -105,7 +106,17 @@ class _BookingScreenState extends State<BookingScreen>
       );
 
       if (context.mounted) {
-        Navigator.pop(context);
+        Navigator.of(context).pushAndRemoveUntil(
+          PageRouteBuilder(
+            pageBuilder: (_, __, ___) => const MainPage(), // make sure HomeScreen is imported
+            transitionsBuilder: (_, animation, __, child) {
+              return FadeTransition(opacity: animation, child: child);
+            },
+            transitionDuration: const Duration(milliseconds: 400),
+          ),
+              (route) => false,
+        );
+
         ScaffoldMessenger.of(context).showSnackBar(
           const SnackBar(
             content: Text('Booking successful!',

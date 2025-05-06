@@ -198,7 +198,7 @@ class _ProviderAdminTestPageState extends State<ProviderAdminTestPage> {
                       children: [
                         Expanded(
                           child: TextFormField(
-                            controller: controllers['price'],
+                            controller: controllers['name'],
                             decoration: InputDecoration(
                               labelText: "Service Name",
                               floatingLabelStyle: const TextStyle(color: Color(0xFF007EA7)),
