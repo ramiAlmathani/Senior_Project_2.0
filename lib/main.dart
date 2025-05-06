@@ -58,6 +58,7 @@ class MyApp extends StatelessWidget {
             providerName: args?['providerName'] ?? 'Unknown Provider',
             totalCost: args?['totalCost'] ?? 0.0,
           );
+
         },
       },
     );

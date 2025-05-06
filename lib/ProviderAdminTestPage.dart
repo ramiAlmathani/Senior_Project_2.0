@@ -10,7 +10,6 @@ class ProviderAdminTestPage extends StatefulWidget {
 
 class _ProviderAdminTestPageState extends State<ProviderAdminTestPage> {
   final _formKey = GlobalKey<FormState>();
-
   final TextEditingController _idController = TextEditingController();
   final TextEditingController _nameController = TextEditingController();
   final TextEditingController _categoryController = TextEditingController();
@@ -61,7 +60,10 @@ class _ProviderAdminTestPageState extends State<ProviderAdminTestPage> {
       });
 
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text("Provider added successfully!")),
+        const SnackBar(
+          content: Text("Provider added successfully!", style: TextStyle(color: Colors.white)),
+          backgroundColor: Colors.green,
+        ),
       );
 
       _formKey.currentState?.reset();
@@ -70,7 +72,10 @@ class _ProviderAdminTestPageState extends State<ProviderAdminTestPage> {
       });
     } catch (e) {
       ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text("Error: ${e.toString()}")),
+        SnackBar(
+          content: Text("Error: ${e.toString()}", style: const TextStyle(color: Colors.white)),
+          backgroundColor: Colors.red,
+        ),
       );
     }
   }
@@ -89,78 +94,183 @@ class _ProviderAdminTestPageState extends State<ProviderAdminTestPage> {
     super.dispose();
   }
 
+  Widget _buildInput({required String label, required TextEditingController controller, bool requiredField = true}) {
+    return TextFormField(
+      controller: controller,
+      decoration: InputDecoration(
+        labelText: label,
+        filled: true,
+        fillColor: Colors.grey[100],
+        border: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(12),
+          borderSide: BorderSide.none,
+        ),
+        focusedBorder: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(12),
+          borderSide: const BorderSide(color: Color(0xFF007EA7), width: 1.5),
+        ),
+        floatingLabelStyle: const TextStyle(color: Color(0xFF007EA7)),
+      ),
+      validator: requiredField
+          ? (val) => val == null || val.isEmpty ? "Required" : null
+          : null,
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: const Text("Add Provider (Admin Test)")),
+      backgroundColor: const Color(0xFFF9FAFB),
+      appBar: AppBar(
+        title: const Text("Add Provider",
+          style: TextStyle(color: Color(0xFF007EA7), fontWeight: FontWeight.bold),
+        ),
+        backgroundColor: const Color(0xFFB2DFDB),
+        iconTheme: const IconThemeData(color: Color(0xFF007EA7)),
+      ),
       body: Padding(
         padding: const EdgeInsets.all(16),
         child: Form(
           key: _formKey,
           child: ListView(
             children: [
-              TextFormField(
-                controller: _idController,
-                decoration: const InputDecoration(labelText: "Provider ID (unique)"),
-                validator: (val) => val == null || val.isEmpty ? "Required" : null,
+              const Text("Provider Info", style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16)),
+              const SizedBox(height: 12),
+              _buildInput(label: "Provider ID", controller: _idController),
+              const SizedBox(height: 12),
+              _buildInput(label: "Provider Name", controller: _nameController),
+              const SizedBox(height: 12),
+              DropdownButtonFormField<String>(
+                value: _categoryController.text.isNotEmpty ? _categoryController.text : null,
+                decoration: InputDecoration(
+                  labelText: "Service Category",
+                  filled: true,
+                  fillColor: Colors.grey[100],
+                  border: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(12),
+                    borderSide: BorderSide.none,
+                  ),
+                  focusedBorder: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(12),
+                    borderSide: const BorderSide(color: Color(0xFF007EA7), width: 1.5),
+                  ),
+                  floatingLabelStyle: const TextStyle(color: Color(0xFF007EA7)),
+                ),
+                items: const [
+                  DropdownMenuItem(value: 'cleaning', child: Text('Cleaning')),
+                  DropdownMenuItem(value: 'handyman', child: Text('Handyman')),
+                  DropdownMenuItem(value: 'plumbing', child: Text('Plumbing')),
+                  DropdownMenuItem(value: 'delivery', child: Text('Delivery')),
+                  DropdownMenuItem(value: 'assembly', child: Text('Assembly')),
+                  DropdownMenuItem(value: 'moving', child: Text('Moving')),
+                  DropdownMenuItem(value: 'more', child: Text('More')),
+                ],
+                onChanged: (value) {
+                  setState(() {
+                    _categoryController.text = value!;
+                  });
+                },
+                validator: (value) =>
+                value == null || value.isEmpty ? 'Required' : null,
               ),
-              TextFormField(
-                controller: _nameController,
-                decoration: const InputDecoration(labelText: "Provider Name"),
-                validator: (val) => val == null || val.isEmpty ? "Required" : null,
-              ),
-              TextFormField(
-                controller: _categoryController,
-                decoration: const InputDecoration(labelText: "Service Category (e.g., cleaning)"),
-                validator: (val) => val == null || val.isEmpty ? "Required" : null,
-              ),
-              TextFormField(
-                controller: _imageUrlController,
-                decoration: const InputDecoration(labelText: "Image URL"),
-              ),
-              TextFormField(
-                controller: _locationController,
-                decoration: const InputDecoration(labelText: "Location"),
-              ),
-              const SizedBox(height: 16),
-              const Text("Services", style: TextStyle(fontWeight: FontWeight.bold)),
+              const SizedBox(height: 12),
+              _buildInput(label: "Image URL", controller: _imageUrlController, requiredField: false),
+              const SizedBox(height: 12),
+              _buildInput(label: "Location", controller: _locationController, requiredField: false),
+
+              const SizedBox(height: 20),
+              const Divider(),
+              const SizedBox(height: 12),
+              const Text("Services", style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16)),
+              const SizedBox(height: 8),
+
               ...serviceControllers.asMap().entries.map((entry) {
                 int index = entry.key;
                 var controllers = entry.value;
-                return Row(
-                  children: [
-                    Expanded(
-                      child: TextFormField(
-                        controller: controllers['name'],
-                        decoration: const InputDecoration(labelText: "Service Name"),
-                        validator: (val) => val == null || val.isEmpty ? "Required" : null,
-                      ),
+
+                return Card(
+                  color: Colors.white,
+                  margin: const EdgeInsets.symmetric(vertical: 8),
+                  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                  child: Padding(
+                    padding: const EdgeInsets.all(12),
+                    child: Row(
+                      children: [
+                        Expanded(
+                          child: TextFormField(
+                            controller: controllers['price'],
+                            decoration: InputDecoration(
+                              labelText: "Service Name",
+                              floatingLabelStyle: const TextStyle(color: Color(0xFF007EA7)),
+                              filled: true,
+                              fillColor: Colors.grey[100],
+                              border: OutlineInputBorder(
+                                borderRadius: BorderRadius.circular(12),
+                                borderSide: BorderSide.none,
+                              ),
+                              focusedBorder: OutlineInputBorder(
+                                borderRadius: BorderRadius.circular(12),
+                                borderSide: const BorderSide(color: Color(0xFF007EA7), width: 1.5),
+                              ),
+                            ),
+                            validator: (val) => val == null || val.isEmpty ? "Required" : null,
+                          ),
+                        ),
+                        const SizedBox(width: 8),
+                        Expanded(
+                          child: TextFormField(
+                            controller: controllers['price'],
+                            decoration: InputDecoration(
+                              labelText: "Price",
+                              floatingLabelStyle: const TextStyle(color: Color(0xFF007EA7)),
+                              filled: true,
+                              fillColor: Colors.grey[100],
+                              border: OutlineInputBorder(
+                                borderRadius: BorderRadius.circular(12),
+                                borderSide: BorderSide.none,
+                              ),
+                              focusedBorder: OutlineInputBorder(
+                                borderRadius: BorderRadius.circular(12),
+                                borderSide: const BorderSide(color: Color(0xFF007EA7), width: 1.5),
+                              ),
+                            ),
+                            keyboardType: TextInputType.number,
+                            validator: (val) => val == null || val.isEmpty ? "Required" : null,
+                          ),
+                        ),
+                        IconButton(
+                          icon: const Icon(Icons.remove_circle, color: Colors.red),
+                          onPressed: () => removeServiceField(index),
+                        ),
+                      ],
                     ),
-                    const SizedBox(width: 8),
-                    Expanded(
-                      child: TextFormField(
-                        controller: controllers['price'],
-                        decoration: const InputDecoration(labelText: "Price"),
-                        keyboardType: TextInputType.number,
-                        validator: (val) => val == null || val.isEmpty ? "Required" : null,
-                      ),
-                    ),
-                    IconButton(
-                      icon: const Icon(Icons.remove_circle, color: Colors.red),
-                      onPressed: () => removeServiceField(index),
-                    ),
-                  ],
+                  ),
                 );
               }),
+
               TextButton.icon(
                 onPressed: addServiceField,
-                icon: const Icon(Icons.add),
-                label: const Text("Add Service"),
+                icon: const Icon(Icons.add, color: Color(0xFF007EA7)),
+                label: const Text("Add Service", style: TextStyle(color: Color(0xFF007EA7))),
               ),
-              const SizedBox(height: 16),
-              ElevatedButton(
-                onPressed: submitProvider,
-                child: const Text("Submit Provider"),
+
+              const SizedBox(height: 24),
+              SizedBox(
+                width: double.infinity,
+                child: ElevatedButton.icon(
+                  onPressed: submitProvider,
+                  icon: const Icon(Icons.save, color: Color(0xFF007EA7)),
+                  label: const Text("Submit Provider", style: const TextStyle(
+                    color: Color(0xFF007EA7),
+                  )),
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: const Color(0xFFB2DFDB),
+                    padding: const EdgeInsets.symmetric(vertical: 16),
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(12),
+                    ),
+                  ),
+                ),
               ),
             ],
           ),

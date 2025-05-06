@@ -29,13 +29,13 @@ class _ProviderServicesPageState extends State<ProviderServicesPage> {
 
   Future<void> fetchProviderServices() async {
     try {
-      final doc = await FirebaseFirestore.instance
+      final query = await FirebaseFirestore.instance
           .collection('providers')
-          .doc(widget.providerId)
+          .where('name', isEqualTo: widget.providerName)
           .get();
 
-      final data = doc.data();
-      if (data != null && data['services'] != null) {
+      if (query.docs.isNotEmpty) {
+        final data = query.docs.first.data();
         services = List<Map<String, dynamic>>.from(data['services']);
       }
     } catch (e) {

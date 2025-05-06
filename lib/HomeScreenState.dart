@@ -4,7 +4,6 @@ import 'package:shared_preferences/shared_preferences.dart';
 import 'package:senior_project/service_model.dart';
 import 'package:senior_project/service_providers_page.dart';
 import 'package:latlong2/latlong.dart';
-
 import '_Chatbot.dart';
 import 'LocationPickerScreen.dart';
 import 'ProviderAdminTestPage.dart';
@@ -153,10 +152,13 @@ class _HomeScreenState extends State<HomeScreen>
 
               ElevatedButton(
                 onPressed: () {
-                  Navigator.push(
-                    context,
-                    MaterialPageRoute(
-                      builder: (_) => const ProviderAdminTestPage(),
+                  Navigator.of(context).push(
+                    PageRouteBuilder(
+                      pageBuilder: (_, __, ___) => const ProviderAdminTestPage(),
+                      transitionsBuilder: (_, animation, __, child) {
+                        return FadeTransition(opacity: animation, child: child);
+                      },
+                      transitionDuration: const Duration(milliseconds: 400),
                     ),
                   );
                 },

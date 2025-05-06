@@ -1,10 +1,8 @@
 import 'package:flutter/material.dart';
-import 'TabBarWidget.dart';
 import 'package:easy_localization/easy_localization.dart';
-import '_OrderData.dart';
+import 'services/firebase_services.dart'; // ✅ Ensure correct path
+import 'TabBarWidget.dart';
 
-
-// --------------------- ORDERS SCREEN ---------------------
 class OrdersScreen extends StatefulWidget {
   final VoidCallback onBackToServices;
 
@@ -19,13 +17,34 @@ class _OrdersScreenState extends State<OrdersScreen>
   late AnimationController _controller;
   late Animation<double> _fadeIn;
 
+  final FirebaseService firebaseService = FirebaseService();
+  List<Map<String, dynamic>> bookings = [];
+  bool loading = true;
+
   @override
   void initState() {
     super.initState();
     _controller = AnimationController(
-        duration: const Duration(milliseconds: 500), vsync: this);
+      duration: const Duration(milliseconds: 500),
+      vsync: this,
+    );
     _fadeIn = CurvedAnimation(parent: _controller, curve: Curves.easeInOut);
     _controller.forward();
+
+    _loadBookings();
+  }
+
+  Future<void> _loadBookings() async {
+    try {
+      final result = await firebaseService.getMyBookings();
+      setState(() {
+        bookings = result;
+        loading = false;
+      });
+    } catch (e) {
+      print('Failed to load bookings: $e');
+      setState(() => loading = false);
+    }
   }
 
   @override
@@ -61,7 +80,8 @@ class _OrdersScreenState extends State<OrdersScreen>
           const SizedBox(height: 24),
           Text(
             title,
-            style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold,color: Color(0xFF007EA7)),
+            style: const TextStyle(
+                fontSize: 18, fontWeight: FontWeight.bold, color: Color(0xFF007EA7)),
           ),
           const SizedBox(height: 8),
           Text(
@@ -102,7 +122,8 @@ class _OrdersScreenState extends State<OrdersScreen>
             const SizedBox(height: 30),
             Text(
               "my_orders".tr(),
-              style: const TextStyle(fontSize: 22, fontWeight: FontWeight.bold, color: Color(0xFF007EA7)),
+              style: const TextStyle(
+                  fontSize: 22, fontWeight: FontWeight.bold, color: Color(0xFF007EA7)),
             ),
             const SizedBox(height: 10),
             const TabBarWidget(),
@@ -110,39 +131,48 @@ class _OrdersScreenState extends State<OrdersScreen>
             Expanded(
               child: TabBarView(
                 children: [
-                  pendingOrders.isEmpty
+                  // ✅ Pending Tab - show real bookings
+                  loading
+                      ? const Center(child: CircularProgressIndicator())
+                      : bookings.isEmpty
                       ? _buildEmptyOrders(
                     "no_pending_orders".tr(),
                     "no_pending_sub".tr(),
                     Icons.hourglass_empty,
                   )
                       : ListView.builder(
-                    itemCount: pendingOrders.length,
+                    itemCount: bookings.length,
                     itemBuilder: (context, index) {
-                      final order = pendingOrders[index];
+                      final booking = bookings[index];
                       return Card(
-                        margin: const EdgeInsets.symmetric(
-                            horizontal: 16, vertical: 8),
+                        margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
                         child: ListTile(
-                          leading: const Icon(Icons.assignment),
-                          title:
-                          Text('${order.service} with ${order.company}'),
+                          leading: const Icon(Icons.assignment, color: Color(0xFF007EA7)),
+                          title: Text(booking['service']),
                           subtitle: Text(
-                              '${order.date} at ${order.time}\n${order.address}'),
+                            "📅 ${booking['date']}  ⏰ ${booking['time']}\n📍 ${booking['address']}",
+                          ),
                           isThreeLine: true,
+                          trailing: Text(
+                            booking['status'] ?? 'Pending',
+                            style: const TextStyle(
+                              color: Colors.orange,
+                              fontWeight: FontWeight.w600,
+                            ),
+                          ),
                         ),
                       );
                     },
                   ),
 
-                  // 🕘 Order History Tab (still dummy)
+                  // ❌ History Tab — placeholder for now
                   _buildEmptyOrders(
                     "no_order_history".tr(),
                     "no_history_sub".tr(),
                     Icons.assignment_turned_in_outlined,
-                    ),
-                  ],
-                ),
+                  ),
+                ],
+              ),
             ),
           ],
         ),
