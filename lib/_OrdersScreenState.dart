@@ -1,7 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:easy_localization/easy_localization.dart';
-import 'services/firebase_services.dart'; // ✅ Ensure correct path
+import 'package:cloud_firestore/cloud_firestore.dart';
+import 'services/firebase_services.dart';
 import 'TabBarWidget.dart';
+import '_OrderDetailsPage.dart';
 
 class OrdersScreen extends StatefulWidget {
   final VoidCallback onBackToServices;
@@ -18,8 +20,6 @@ class _OrdersScreenState extends State<OrdersScreen>
   late Animation<double> _fadeIn;
 
   final FirebaseService firebaseService = FirebaseService();
-  List<Map<String, dynamic>> bookings = [];
-  bool loading = true;
 
   @override
   void initState() {
@@ -30,27 +30,23 @@ class _OrdersScreenState extends State<OrdersScreen>
     );
     _fadeIn = CurvedAnimation(parent: _controller, curve: Curves.easeInOut);
     _controller.forward();
-
-    _loadBookings();
-  }
-
-  Future<void> _loadBookings() async {
-    try {
-      final result = await firebaseService.getMyBookings();
-      setState(() {
-        bookings = result;
-        loading = false;
-      });
-    } catch (e) {
-      print('Failed to load bookings: $e');
-      setState(() => loading = false);
-    }
   }
 
   @override
   void dispose() {
     _controller.dispose();
     super.dispose();
+  }
+
+  Stream<QuerySnapshot<Map<String, dynamic>>> _bookingStream() {
+    final userId = firebaseService.getCurrentUserId();
+    if (userId == null) return const Stream.empty();
+
+    return FirebaseFirestore.instance
+        .collection('requests')
+        .where('userId', isEqualTo: userId)
+        .orderBy('timestamp', descending: true)
+        .snapshots();
   }
 
   Widget _buildEmptyOrders(String title, String subtitle, IconData icon) {
@@ -110,9 +106,56 @@ class _OrdersScreenState extends State<OrdersScreen>
     );
   }
 
+  Widget _buildBookingTile(QueryDocumentSnapshot<Map<String, dynamic>> doc) {
+    final booking = doc.data();
+    final status = (booking['status'] ?? 'pending').toLowerCase();
+
+    final Color statusColor = {
+      'pending': Colors.orange,
+      'canceled': Colors.red,
+      'completed': Colors.green,
+    }[status] ?? Colors.grey;
+
+    return GestureDetector(
+      onTap: () {
+        Navigator.of(context).push(
+          PageRouteBuilder(
+            pageBuilder: (_, __, ___) => OrderDetailsPage(
+              docId: doc.id,
+              booking: booking,
+            ),
+            transitionsBuilder: (_, animation, __, child) {
+              return FadeTransition(opacity: animation, child: child);
+            },
+            transitionDuration: const Duration(milliseconds: 400),
+          ),
+        );
+      },
+      child: Card(
+        margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+        child: ListTile(
+          leading: const Icon(Icons.assignment, color: Color(0xFF007EA7)),
+          title: Text(booking['service']),
+          subtitle: Text(
+            "📅 ${booking['date']}  ⏰ ${booking['time']}\n📍 ${booking['address']}",
+          ),
+          isThreeLine: true,
+          trailing: Text(
+            status.toUpperCase(),
+            style: TextStyle(
+              color: statusColor,
+              fontWeight: FontWeight.bold,
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     final _ = context.locale;
+
     return FadeTransition(
       opacity: _fadeIn,
       child: DefaultTabController(
@@ -123,55 +166,57 @@ class _OrdersScreenState extends State<OrdersScreen>
             Text(
               "my_orders".tr(),
               style: const TextStyle(
-                  fontSize: 22, fontWeight: FontWeight.bold, color: Color(0xFF007EA7)),
+                fontSize: 22,
+                fontWeight: FontWeight.bold,
+                color: Color(0xFF007EA7),
+              ),
             ),
             const SizedBox(height: 10),
             const TabBarWidget(),
             const SizedBox(height: 10),
             Expanded(
-              child: TabBarView(
-                children: [
-                  // ✅ Pending Tab - show real bookings
-                  loading
-                      ? const Center(child: CircularProgressIndicator())
-                      : bookings.isEmpty
-                      ? _buildEmptyOrders(
-                    "no_pending_orders".tr(),
-                    "no_pending_sub".tr(),
-                    Icons.hourglass_empty,
-                  )
-                      : ListView.builder(
-                    itemCount: bookings.length,
-                    itemBuilder: (context, index) {
-                      final booking = bookings[index];
-                      return Card(
-                        margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-                        child: ListTile(
-                          leading: const Icon(Icons.assignment, color: Color(0xFF007EA7)),
-                          title: Text(booking['service']),
-                          subtitle: Text(
-                            "📅 ${booking['date']}  ⏰ ${booking['time']}\n📍 ${booking['address']}",
-                          ),
-                          isThreeLine: true,
-                          trailing: Text(
-                            booking['status'] ?? 'Pending',
-                            style: const TextStyle(
-                              color: Colors.orange,
-                              fontWeight: FontWeight.w600,
-                            ),
-                          ),
-                        ),
-                      );
-                    },
-                  ),
+              child: StreamBuilder<QuerySnapshot<Map<String, dynamic>>>(
+                stream: _bookingStream(),
+                builder: (context, snapshot) {
+                  if (snapshot.connectionState == ConnectionState.waiting) {
+                    return const Center(child: CircularProgressIndicator());
+                  }
 
-                  // ❌ History Tab — placeholder for now
-                  _buildEmptyOrders(
-                    "no_order_history".tr(),
-                    "no_history_sub".tr(),
-                    Icons.assignment_turned_in_outlined,
-                  ),
-                ],
+                  if (!snapshot.hasData || snapshot.data!.docs.isEmpty) {
+                    return _buildEmptyOrders(
+                      "no_pending_orders".tr(),
+                      "no_pending_sub".tr(),
+                      Icons.hourglass_empty,
+                    );
+                  }
+
+                  final docs = snapshot.data!.docs;
+                  final pending = docs
+                      .where((doc) => (doc.data()['status'] ?? 'pending') == 'pending')
+                      .toList();
+                  final history = docs
+                      .where((doc) => (doc.data()['status'] ?? 'pending') != 'pending')
+                      .toList();
+
+                  return TabBarView(
+                    children: [
+                      pending.isEmpty
+                          ? _buildEmptyOrders(
+                        "no_pending_orders".tr(),
+                        "no_pending_sub".tr(),
+                        Icons.hourglass_empty,
+                      )
+                          : ListView(children: pending.map(_buildBookingTile).toList()),
+                      history.isEmpty
+                          ? _buildEmptyOrders(
+                        "no_order_history".tr(),
+                        "no_history_sub".tr(),
+                        Icons.assignment_turned_in_outlined,
+                      )
+                          : ListView(children: history.map(_buildBookingTile).toList()),
+                    ],
+                  );
+                },
               ),
             ),
           ],

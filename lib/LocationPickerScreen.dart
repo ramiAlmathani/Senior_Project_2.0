@@ -26,8 +26,13 @@ class _LocationPickerScreenState extends State<LocationPickerScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text("Select Your Location"),
-        backgroundColor: const Color(0xFF007EA7),
+        title: const Text("Select Your Location",
+            style: const TextStyle(
+              fontWeight: FontWeight.bold,
+              color: Color(0xFF007EA7),
+            )),
+        backgroundColor: const Color(0xFFB2DFDB),
+        foregroundColor: const Color(0xFF007EA7),
       ),
       body: FlutterMap(
         options: MapOptions(
@@ -56,8 +61,6 @@ class _LocationPickerScreenState extends State<LocationPickerScreen> {
               ),
             ],
           ),
-
-
         ],
       ),
       bottomNavigationBar: Padding(
@@ -65,18 +68,18 @@ class _LocationPickerScreenState extends State<LocationPickerScreen> {
         child: ElevatedButton(
           onPressed: _confirmLocation,
           style: ElevatedButton.styleFrom(
-            backgroundColor: const Color(0xFF007EA7),
+            backgroundColor: const Color(0xFFB2DFDB),
             padding: const EdgeInsets.symmetric(vertical: 14),
           ),
           child: const Text(
             "Confirm Location",
-            style: TextStyle(fontSize: 16),
+            style: TextStyle(
+              fontSize: 16,
+              color: Color(0xFF007EA7),
+            ),
           ),
         ),
       ),
     );
   }
 }
-
-
-

@@ -78,9 +78,17 @@ class _HomeScreenState extends State<HomeScreen>
               // ✅ Location Selector
               GestureDetector(
                 onTap: () async {
-                  final result = await Navigator.push(
-                    context,
-                    MaterialPageRoute(builder: (_) => const LocationPickerScreen()),
+                  final result = await Navigator.of(context).push(
+                    PageRouteBuilder(
+                      pageBuilder: (_, __, ___) => const LocationPickerScreen(),
+                      transitionsBuilder: (_, animation, __, child) {
+                        return FadeTransition(
+                          opacity: animation,
+                          child: child,
+                        );
+                      },
+                      transitionDuration: const Duration(milliseconds: 400),
+                    ),
                   );
                   if (result != null && result is LatLng) {
                     setState(() {

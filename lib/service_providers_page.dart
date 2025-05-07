@@ -17,6 +17,10 @@ class ServiceProvidersPage extends StatelessWidget {
       appBar: AppBar(
         title: Text(
           tr("providers_title", namedArgs: {"service": service.nameKey.tr()}),
+          style: const TextStyle(
+            fontWeight: FontWeight.bold,
+            color: Color(0xFF007EA7),
+          ),
         ),
         backgroundColor: const Color(0xFFB2DFDB),
         foregroundColor: const Color(0xFF007EA7),

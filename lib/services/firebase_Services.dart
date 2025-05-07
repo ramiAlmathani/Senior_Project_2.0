@@ -28,13 +28,13 @@ class FirebaseService {
     });
   }
 
-  /// Get all available services (e.g., plumbing, handyman, etc.)
+  /// Get all available services (if you use static services from Firestore)
   Future<List<Map<String, dynamic>>> getAllServices() async {
     final snapshot = await _firestore.collection('services').get();
     return snapshot.docs.map((doc) => doc.data()).toList();
   }
 
-  /// Get all bookings for the current user
+  /// Get all bookings (map-based) for the current user
   Future<List<Map<String, dynamic>>> getMyBookings() async {
     final user = _auth.currentUser;
     if (user == null) throw Exception("User not logged in");
@@ -48,17 +48,31 @@ class FirebaseService {
     return snapshot.docs.map((doc) => doc.data()).toList();
   }
 
-  /// Get the current user ID (if logged in)
+  /// Get bookings as snapshots (for detail + ID access)
+  Future<QuerySnapshot<Map<String, dynamic>>> getMyBookingsSnapshot() async {
+    final user = _auth.currentUser;
+    if (user == null) throw Exception("User not logged in");
+
+    return await _firestore
+        .collection('requests')
+        .where('userId', isEqualTo: user.uid)
+        .orderBy('timestamp', descending: true)
+        .get();
+  }
+
+  /// Get the current user ID
   String? getCurrentUserId() {
     return _auth.currentUser?.uid;
   }
 
-  /// Sign out user (optional utility)
+  /// Sign out user
   Future<void> signOut() async {
     await _auth.signOut();
   }
+
+  /// (Optional) Add a test provider to Firestore
   Future<void> addProvider() async {
-    await FirebaseFirestore.instance.collection('providers').doc('sparkle_clean').set({
+    await _firestore.collection('providers').doc('sparkle_clean').set({
       'name': 'SparkleClean',
       'category': 'cleaning',
       'rating': 4.5,
@@ -70,15 +84,14 @@ class FirebaseService {
       ],
     });
   }
-
-
 }
 
+/// Admin service helper for adding providers
 class FirebaseAdminService {
   final FirebaseFirestore _firestore = FirebaseFirestore.instance;
 
   Future<void> addProvider({
-    required String id, // unique ID for document
+    required String id,
     required String name,
     required String category,
     required String imageUrl,
