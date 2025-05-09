@@ -193,8 +193,12 @@ class _BookingScreenState extends State<BookingScreen>
     return Scaffold(
       backgroundColor: const Color(0xFFF9FAFB),
       appBar: AppBar(
-        title: const Text('Book a Service'),
-        backgroundColor: const Color(0xFF007EA7),
+        title: const Text('Book a Service',style: const TextStyle(
+          fontWeight: FontWeight.bold,
+          color: Color(0xFF007EA7),
+        )),
+        backgroundColor: const Color(0xFFB2DFDB),
+        foregroundColor: const Color(0xFF007EA7),
         elevation: 0,
       ),
       body: FadeTransition(
@@ -234,13 +238,13 @@ class _BookingScreenState extends State<BookingScreen>
                   width: double.infinity,
                   child: ElevatedButton.icon(
                     onPressed: _submitBooking,
-                    icon: const Icon(Icons.check, color: Colors.white),
+                    icon: const Icon(Icons.check, color: Color(0xFF007EA7)),
                     label: const Text(
                       "Confirm Booking",
-                      style: TextStyle(color: Colors.white),
+                      style: TextStyle(color: Color(0xFF007EA7)),
                     ),
                     style: ElevatedButton.styleFrom(
-                      backgroundColor: const Color(0xFF007EA7),
+                      backgroundColor: const Color(0xFFB2DFDB),
                       padding: const EdgeInsets.symmetric(vertical: 16),
                       shape: RoundedRectangleBorder(
                         borderRadius: BorderRadius.circular(14),

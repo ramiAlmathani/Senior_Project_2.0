@@ -114,9 +114,12 @@ class _MyProfilePageState extends State<MyProfilePage>
               fontWeight: FontWeight.bold,
               color: Colors.black54,
             )),
-        subtitle: Text(
-          value,
-          style: const TextStyle(fontSize: 16, color: Colors.black87),
+        subtitle: Directionality(
+          textDirection: ui.TextDirection.ltr,
+          child: Text(
+            value,
+            style: const TextStyle(fontSize: 16, color: Colors.black87),
+          ),
         ),
       ),
     );

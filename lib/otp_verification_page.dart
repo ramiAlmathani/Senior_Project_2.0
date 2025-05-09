@@ -124,20 +124,21 @@ class _OTPVerificationPageState extends State<OTPVerificationPage>
                         style: const TextStyle(fontSize: 16, color: Colors.grey),
                         children: [
                           WidgetSpan(
-                            alignment: PlaceholderAlignment.middle,
                             child: Directionality(
                               textDirection: ui.TextDirection.ltr,
                               child: Text(
                                 '+966 ${widget.phoneNumber}',
-                                style: const TextStyle(fontSize: 16, color: Colors.grey),
+                                style: const TextStyle(fontWeight: FontWeight.bold, color: Colors.grey),
                               ),
                             ),
                           ),
                         ],
                       ),
                       textAlign: TextAlign.center,
-                      textDirection: ui.TextDirection.rtl,
+                      textDirection: Directionality.of(context),
                     ),
+
+
                     const SizedBox(height: 40),
 
                     TextField(
