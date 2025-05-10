@@ -74,7 +74,12 @@ class _BookingScreenState extends State<BookingScreen>
   Future<void> _pickLocation() async {
     final LatLng? selected = await Navigator.push(
       context,
-      MaterialPageRoute(builder: (_) => const LocationPickerScreen()),
+        PageRouteBuilder(pageBuilder: (_, __, ___) => const LocationPickerScreen(),
+        transitionsBuilder: (_, animation, __, child) {
+          return FadeTransition(opacity: animation, child: child);
+        },
+        transitionDuration: const Duration(milliseconds: 400),
+      ),
     );
     if (selected != null) {
       _addressController.text =
