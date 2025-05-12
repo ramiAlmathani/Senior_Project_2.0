@@ -45,7 +45,7 @@ You’ll need the following tools installed:
 #### 1. Clone the Repository
 
 
-git clone https://github.com/your-username/senior_project_2.git 
+git clone https://github.com/ramiAlmathani/Senior_Project_2.0.git 
 
 cd senior_project_2
 
