@@ -46,6 +46,7 @@ You’ll need the following tools installed:
 
 
 git clone https://github.com/your-username/senior_project_2.git 
+
 cd senior_project_2
 
 #### 2. Install Dependencies
