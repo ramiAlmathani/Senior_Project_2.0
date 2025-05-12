@@ -1,19 +1,42 @@
-# 📱 Senior Projec (Handz)
+# 📱 Senior Project (Handz)
 
-A complete Flutter + Firebase mobile application developed as a senior project at **King Fahd University of Petroleum and Minerals (KFUPM)**.
+A complete Flutter + Firebase mobile application developed as a senior project at  
+**[King Fahd University of Petroleum and Minerals (KFUPM)](https://www.kfupm.edu.sa/ )**.
 
 ---
 
-## 🚀 How to Run the App Locally
+## 🚀 Overview
 
-Follow the steps below to install and run the app on your device or emulator.
+This mobile app is built using **Flutter** and leverages **Firebase** for backend services such as authentication, real-time data storage, and cloud functions. It was designed and implemented as part of our senior year project.
 
-### ✅ Requirements
+---
 
-- [Flutter SDK](https://docs.flutter.dev/get-started/install)
-- Android Studio or VS Code
-- A physical or virtual device
-- Firebase project access (or your own Firebase setup)
+## 🧰 Technologies Used
+
+- [Flutter](https://flutter.dev/ )
+- [Firebase](https://firebase.google.com/ )
+  - Authentication
+  - Firestore
+  - Cloud Messaging (optional)
+- Android Studio / VS Code
+- Dart & Firebase SDKs
+
+---
+
+## 🛠️ How to Run the App Locally
+
+Follow these steps to install and run the app on your local machine or emulator.
+
+### ✅ Prerequisites
+
+You’ll need the following tools installed:
+
+| Tool | Description |
+|------|-------------|
+| Flutter SDK | [Install from here](https://docs.flutter.dev/get-started/install ) |
+| IDE | Android Studio or Visual Studio Code |
+| Device | Physical device or emulator/simulator |
+| Firebase Access | Either use provided config or set up your own |
 
 ---
 
@@ -21,53 +44,14 @@ Follow the steps below to install and run the app on your device or emulator.
 
 #### 1. Clone the Repository
 
-```bash
-git clone https://github.com/your-username/senior_project_2.git
+
+git clone https://github.com/your-username/senior_project_2.git 
 cd senior_project_2
-2. Install Dependencies
-bash
-Copy
-Edit
+
+#### 2. Install Dependencies
 flutter pub get
-3. Firebase Configuration
-Download google-services.json from the Firebase Console.
 
-Place it in the following directory:
-
-bash
-Copy
-Edit
-android/app/google-services.json
-✅ (Optional for iOS)
-Download GoogleService-Info.plist and place it in:
-
-swift
-Copy
-Edit
-ios/Runner/GoogleService-Info.plist
-🔒 You can also set up your own Firebase project and enable:
-
-Authentication
-
-Firestore
-
-Any other required services
-
-4. Set Up Environment Variables (If Required)
-If the project uses a .env file for secrets or config:
-
-Create a file called .env in the root directory.
-
-Example content:
-
-ini
-Copy
-Edit
-API_KEY=your_api_key_here
-5. Run the App
-bash
-Copy
-Edit
+#### 3. Run the app
 flutter run
-This will launch the app on your connected device or emulator.
+
 
